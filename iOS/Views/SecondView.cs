@@ -12,19 +12,18 @@ using MvvmCross.Platform;
 
 namespace MvvmCross.StateRestoration.iOS
 {
-	public class FirstView : MvxViewController<FirstViewModel>, IUIViewControllerRestoration
+	public class SecondView : MvxViewController<SecondViewModel>, IUIViewControllerRestoration
 	{
 		UILabel lbl;
 		UIButton btn;
-	    private UIButton gotoSecondBtn;
 
-	    const string BackgroundColorKey = "kBackgroundColor";
-		const string RestorationID = "MyRestoreIDFirstView";
+		const string BackgroundColorKey = "kBackgroundColor";
+		const string RestorationID = "MyRestoreIDSecondView";
 
         //
         // Summary:
         //     Default constructor that initializes a new instance of this class with no parameters.
-        public FirstView() : base()
+        public SecondView() : base()
         {
             InitMePlease();
         }
@@ -87,7 +86,7 @@ namespace MvvmCross.StateRestoration.iOS
         //     property to a nib file stored inside the storyboard.
         //     For more information about how a view controller loads its view, see Resource
         //     Management in View Controllers in View Controller Programming Guide for iOS.
-        public FirstView(string nibName, NSBundle bundle) : base(nibName, bundle)
+        public SecondView(string nibName, NSBundle bundle) : base(nibName, bundle)
         {
             Console.WriteLine("nib:{0}, bundle:{1}", nibName, bundle);
             InitMePlease();
@@ -155,7 +154,7 @@ namespace MvvmCross.StateRestoration.iOS
         //     Objective-C object. You should not invoke this method directly, instead you should
         //     call the GetNSObject method as it will prevent two instances of a managed object
         //     to point to the same native object.
-        protected internal FirstView(IntPtr handle) : base(handle)
+        protected internal SecondView(IntPtr handle) : base(handle)
         {
             Console.WriteLine(handle);
             InitMePlease();
@@ -163,7 +162,7 @@ namespace MvvmCross.StateRestoration.iOS
         public void InitMePlease()
         {
             RestorationIdentifier = RestorationID;
-            RestorationClass = new Class(typeof(FirstView));
+            RestorationClass = new Class(typeof(SecondView));
         }
 
         public override void ViewDidLoad()
@@ -175,15 +174,7 @@ namespace MvvmCross.StateRestoration.iOS
 			lbl.Lines = 0;
 			lbl.Text = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
-            gotoSecondBtn = new UIButton(new CGRect(20, 200, screenRect.Width - 40, 100));
-            gotoSecondBtn.BackgroundColor = UIColor.White;
-            gotoSecondBtn.SetTitle("Goto Second", UIControlState.Normal);
-            gotoSecondBtn.SetTitleColor(UIColor.Red, UIControlState.Normal);
-            gotoSecondBtn.Layer.BorderWidth = 1;
-            gotoSecondBtn.Layer.BorderColor = UIColor.Green.CGColor;
-            gotoSecondBtn.TouchUpInside += OnNavigateTapped;
-
-            btn = new UIButton(new CGRect(20, 340, screenRect.Width - 40, 100));
+			btn = new UIButton(new CGRect(20, 200, screenRect.Width - 40, 100));
 			btn.BackgroundColor = UIColor.White;
 			btn.SetTitle("Toggle Background", UIControlState.Normal);
 			btn.SetTitleColor(UIColor.Blue, UIControlState.Normal);
@@ -192,15 +183,10 @@ namespace MvvmCross.StateRestoration.iOS
 			btn.TouchUpInside += OnBackgroundToggleTapped;
 
 			View.BackgroundColor = UIColor.White;
-			View.AddSubviews(lbl, gotoSecondBtn, btn);
+			View.AddSubviews(lbl, btn);
 		}
 
-	    private void OnNavigateTapped(object sender, EventArgs e)
-	    {
-	        ViewModel.DoIt();
-	    }
-
-	    void OnBackgroundToggleTapped(object sender, EventArgs e)
+		void OnBackgroundToggleTapped(object sender, EventArgs e)
 		{
 			if (View.BackgroundColor == UIColor.White)
 			{
@@ -226,14 +212,14 @@ namespace MvvmCross.StateRestoration.iOS
         [Export("viewControllerWithRestorationIdentifierPath:coder:")]
         static UIViewController FromIdentifierPath(string[] identifierComponents, NSCoder coder)
         {
-            var request = new MvxViewModelRequest(typeof(FirstViewModel), null, null, null);
+            var request = new MvxViewModelRequest(typeof(SecondViewModel), null, null, null);
             var vml = Mvx.Resolve<IMvxViewModelLoader>();
-            var vm = vml.LoadViewModel(request, null) as FirstViewModel;
-            var firstView = new FirstView
+            var vm = vml.LoadViewModel(request, null) as SecondViewModel;
+            var secondView = new SecondView()
             {
                 ViewModel = vm
             };
-            return firstView;
+            return secondView;
         }
     }
 }

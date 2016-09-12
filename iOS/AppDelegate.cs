@@ -13,7 +13,8 @@ namespace MvvmCross.StateRestoration.iOS
 	[Register("AppDelegate")]
 	public class AppDelegate : MvxApplicationDelegate
 	{
-		// class-level declarations
+	    private bool DidDecode;
+	    // class-level declarations
 
 		public override UIWindow Window
 		{
@@ -29,36 +30,41 @@ namespace MvvmCross.StateRestoration.iOS
 			{
 				Window = new UIWindow(UIScreen.MainScreen.Bounds);
 			}
-
-			var presenter = new MvxIosViewPresenter(this, Window);
-			var setup = new Setup(this, presenter);
-			setup.Initialize();
-
-			// This initialized with a certian ViewModel - how do I get this to play with state restoration?
-			var startup = Mvx.Resolve<IMvxAppStart>();
-			startup.Start();
-
-			return true;
+            var presenter = new SuperMvxIosViewPresenter(this, Window);
+            var setup = new Setup(this, presenter);
+            setup.Initialize();
+            return true;
 		}
+	    public override void DidDecodeRestorableState(UIApplication application, NSCoder coder)
+	    {
+	        DidDecode = true;
+	    }
 
-		public override UIViewController GetViewController(UIApplication application, string[] restorationIdentifierComponents, NSCoder coder)
+	    public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
+        {
+            if (!DidDecode)
+            {
+                var startup = Mvx.Resolve<IMvxAppStart>();
+                startup.Start();
+            }
+
+            Window.MakeKeyAndVisible();
+
+            var rootVC = UIApplication.SharedApplication.KeyWindow.RootViewController;
+            rootVC.RestorationIdentifier = "Fred";
+
+            return true;
+        }
+
+        public override UIViewController GetViewController(UIApplication application, string[] restorationIdentifierComponents, NSCoder coder)
 		{
-			// How do I get ViewControllers to restore their own state?
-			return new UIViewController();
+            // How do I get ViewControllers to restore their own state?
+            var presenter = new SuperMvxIosViewPresenter(this, Window);
+		    var nav = presenter.CreateNavigationController();
+		    Window.RootViewController = nav;
+		    return nav;
 		}
 
-
-		public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
-		{
-
-			Window.MakeKeyAndVisible();
-
-			var rootVC = UIApplication.SharedApplication.KeyWindow.RootViewController;
-			rootVC.RestorationIdentifier = "RootViewController";
-
-
-			return true;
-		}
 
 		public override bool ShouldSaveApplicationState(UIApplication application, NSCoder coder)
 		{
@@ -71,6 +77,18 @@ namespace MvvmCross.StateRestoration.iOS
 		}
 
 	}
+
+    public class SuperMvxIosViewPresenter : MvxIosViewPresenter
+    {
+        public SuperMvxIosViewPresenter(IUIApplicationDelegate applicationDelegate, UIWindow window) : base(applicationDelegate, window)
+        {
+        }
+
+        public UINavigationController CreateNavigationController()
+        {
+            return new UINavigationController();
+        }
+    }
 }
 
 
