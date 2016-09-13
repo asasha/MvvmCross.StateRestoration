@@ -1,3 +1,4 @@
+*.bak
 *.userprefs
 */bin/
 */obj/
