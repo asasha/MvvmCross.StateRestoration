@@ -28,6 +28,8 @@ namespace MvvmCross.StateRestoration
 			get { return _navigateCommand = _navigateCommand ?? new MvxCommand(NavigateToSecondViewModel); }
 		}
 
+
+
 		int count = 0;
 		MvxCommand _addOneCommand;
 		MvxCommand _lessOneCommand;

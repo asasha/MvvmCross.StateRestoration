@@ -10,13 +10,14 @@ using MvvmCross.Core.ViewModels;
 using MvvmCross.iOS.Platform;
 using MvvmCross.Platform;
 using MvvmCross.Binding.BindingContext;
+using MvvmCross.Platform.iOS;
 
 namespace MvvmCross.StateRestoration.iOS
 {
 	public class SecondView : MvxViewController<SecondViewModel>, IUIViewControllerRestoration
 	{
-		UILabel lbl;
-		UIButton btn;
+		UILabel _nameLabel;
+		UITextView _textView;
 
 		const string BackgroundColorKey = "kBackgroundColor";
 		const string RestorationID = "SecondView";
@@ -35,49 +36,52 @@ namespace MvvmCross.StateRestoration.iOS
             base.ViewDidLoad();
             var screenRect = View.Bounds;
 
-			lbl = new UILabel(new CGRect(20, 50, screenRect.Width - 20, 100));
-			lbl.Lines = 0;
-
-			btn = new UIButton(new CGRect(20, 200, screenRect.Width - 40, 100));
-			btn.BackgroundColor = UIColor.White;
-			btn.SetTitle("Toggle Background", UIControlState.Normal);
-			btn.SetTitleColor(UIColor.Blue, UIControlState.Normal);
-			btn.Layer.BorderWidth = 1;
-			btn.Layer.BorderColor = UIColor.Purple.CGColor;
-			btn.TouchUpInside += OnBackgroundToggleTapped;
-
+			// Set up views
 			View.BackgroundColor = UIColor.White;
-			View.AddSubviews(lbl, btn);
+
+			_nameLabel = new UILabel { TranslatesAutoresizingMaskIntoConstraints = false };
+
+			_textView = new UITextView
+			{
+				TranslatesAutoresizingMaskIntoConstraints = false,
+				Layer = {
+					BorderWidth = 1,
+					CornerRadius = 4,
+					BorderColor = UIColor.Gray.CGColor
+				}
+			};
+
+			View.AddSubviews(_nameLabel, _textView);
+
+			// Set up constraints
+			var viewsAndMetrics = new object[] {
+				"name", _nameLabel,
+				"textView", _textView,
+			};
+
+			View.AddConstraints(NSLayoutConstraint.FromVisualFormat(
+				"V:|-60-[name(45)]-10-[textView]-20-|", 0, viewsAndMetrics));
+			View.AddConstraints(NSLayoutConstraint.FromVisualFormat(
+				"H:|-[name]-|", 0, viewsAndMetrics));
+			View.AddConstraints(NSLayoutConstraint.FromVisualFormat(
+				"H:|-[textView]-|", 0, viewsAndMetrics));
 
 			// Set up bindings
 			var bindingSet = this.CreateBindingSet<SecondView, SecondViewModel>();
-			bindingSet.Bind(lbl).To(vm => vm.Title);
+			bindingSet.Bind(_nameLabel).To(vm => vm.Title);
+			bindingSet.Bind(_textView).For(v => v.Text).To(vm => vm.EntryText);
 			bindingSet.Apply();
 		}
-
-		void OnBackgroundToggleTapped(object sender, EventArgs e)
-		{
-			if (View.BackgroundColor == UIColor.White)
-			{
-				View.BackgroundColor = UIColor.LightGray;
-			}
-			else {
-				View.BackgroundColor = UIColor.White;
-			}
-		}
-
 
 		public override void EncodeRestorableState(Foundation.NSCoder coder)
 		{
 			this.PrintLaunchState("EncodeRestorableState");
 			base.EncodeRestorableState(coder);
-			coder.Encode(View.BackgroundColor, BackgroundColorKey);
 		}
 		public override void DecodeRestorableState(Foundation.NSCoder coder)
 		{
 			this.PrintLaunchState("DecodeRestorableState");
 			base.DecodeRestorableState(coder);
-			View.BackgroundColor = (UIColor) coder.DecodeObject(BackgroundColorKey);
 		}
 
         [Export("viewControllerWithRestorationIdentifierPath:coder:")]
