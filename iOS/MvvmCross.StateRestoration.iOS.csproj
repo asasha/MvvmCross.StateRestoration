@@ -145,6 +145,7 @@
     <Compile Include="Setup.cs" />
     <Compile Include="Views\SecondView.cs" />
     <Compile Include="Views\FirstView.cs" />
+    <Compile Include="DebugUtil.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>
